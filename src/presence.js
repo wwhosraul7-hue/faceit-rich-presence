@@ -22,7 +22,10 @@ const { badgeUrl } = require('./app-config');
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 
 // FACEIT logo, hosted on Wikimedia Commons (CC BY 4.0), used as the default/idle image.
-const FACEIT_LOGO_URL = 'https://commons.wikimedia.org/wiki/Special:FilePath/FACEITLogo.png';
+// Direct upload.wikimedia.org URL, not the commons.wikimedia.org/.../Special:FilePath
+// redirect wrapper - Discord's asset resolver doesn't reliably follow that redirect
+// chain (302 -> 301 -> the real file), which showed up as a broken image in Rich Presence.
+const FACEIT_LOGO_URL = 'https://upload.wikimedia.org/wikipedia/commons/9/95/FACEITLogo.png';
 
 // Map images source: https://github.com/MurkyYT/cs2-map-icons - auto-updated from the
 // CS2 game files, official Valve images.
@@ -49,7 +52,9 @@ function phaseLabel(phase) {
 class PresenceService extends EventEmitter {
   constructor() {
     super();
-    this.baseDir = __dirname;
+    // Real value always comes from configure(baseDir) before use - this is
+    // just a harmless default (src/ -> project root).
+    this.baseDir = path.join(__dirname, '..');
     this.cacheFile = path.join(this.baseDir, 'cache.json');
     this.config = null;
     this.client = null;

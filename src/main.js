@@ -25,6 +25,8 @@ const { findCs2CfgFolders } = require('./steam-locate');
 const FACEIT_DEVELOPERS_URL = 'https://developers.faceit.com/';
 const DISCORD_DEVELOPERS_URL = 'https://discord.com/developers/applications';
 const UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
+// This file lives in src/ - renderer/, build/ etc. are siblings of src/, one level up.
+const PROJECT_ROOT = path.join(__dirname, '..');
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
@@ -38,7 +40,7 @@ if (!gotLock) {
 
   /** Folder where .env / cache.json / the GSI cfg live, next to the running exe. */
   function getBaseDir() {
-    if (!app.isPackaged) return __dirname;
+    if (!app.isPackaged) return PROJECT_ROOT;
     // electron-builder's "portable" target sets this to the real folder the
     // user put the .exe in (the exe itself runs from a temp extraction dir).
     if (process.env.PORTABLE_EXECUTABLE_DIR) return process.env.PORTABLE_EXECUTABLE_DIR;
@@ -102,13 +104,13 @@ if (!gotLock) {
       alwaysOnTop: true,
       hasShadow: false,
       webPreferences: {
-        preload: path.join(__dirname, 'renderer', 'panel-preload.js'),
+        preload: path.join(PROJECT_ROOT, 'renderer', 'panel-preload.js'),
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
       },
     });
-    panelWindow.loadFile(path.join(__dirname, 'renderer', 'panel.html'));
+    panelWindow.loadFile(path.join(PROJECT_ROOT, 'renderer', 'panel.html'));
     // resizable must stay true for setSize() to work on this frameless/transparent
     // window (Windows quirk) - block manual drag-resize, but allow our own setSize calls.
     // ('will-resize' only fires for user-driven resizes, not programmatic ones.)
@@ -170,16 +172,16 @@ if (!gotLock) {
       transparent: true,
       backgroundColor: '#00000000',
       hasShadow: false,
-      icon: path.join(__dirname, 'build', 'icon.ico'),
+      icon: path.join(PROJECT_ROOT, 'build', 'icon.ico'),
       title: 'FACEIT RPC — Configurare',
       webPreferences: {
-        preload: path.join(__dirname, 'renderer', 'settings-preload.js'),
+        preload: path.join(PROJECT_ROOT, 'renderer', 'settings-preload.js'),
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
       },
     });
-    settingsWindow.loadFile(path.join(__dirname, 'renderer', 'settings.html'));
+    settingsWindow.loadFile(path.join(PROJECT_ROOT, 'renderer', 'settings.html'));
     settingsWindow.on('closed', () => {
       settingsWindow = null;
     });
@@ -337,7 +339,7 @@ if (!gotLock) {
     const baseDir = getBaseDir();
     appSettings = appSettingsStore.load(baseDir);
 
-    const iconPath = path.join(__dirname, 'build', 'icon.ico');
+    const iconPath = path.join(PROJECT_ROOT, 'build', 'icon.ico');
     tray = new Tray(iconPath);
     tray.setToolTip('FACEIT RPC');
     tray.on('click', togglePanel);

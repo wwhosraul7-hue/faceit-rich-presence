@@ -7,10 +7,12 @@ Game State Integration (GSI), sistemul oficial Valve pentru asta.
 ## Setup GitHub (o singura data, obligatoriu pentru badge-ul de nivel + notificarea de update)
 
 Badge-ul de nivel FACEIT (iconita mica peste harta) si notificarea "versiune noua disponibila"
-au nevoie de un repo GitHub public sau privat unde tii pozele si dai Release-uri.
+au nevoie de un repo GitHub **public** unde tii pozele si dai Release-uri (trebuie sa fie
+public - `raw.githubusercontent.com` si `api.github.com` nu raspund fara autentificare pentru
+repo-uri private, deci badge-ul si update-check-ul nu ar functiona pe un repo privat).
 
-1. Creeaza un repo gol pe [github.com/new](https://github.com/new) (orice nume, ex. `faceit-rpc`).
-2. In [app-config.js](app-config.js), schimba linia:
+1. Creeaza un repo gol pe [github.com/new](https://github.com/new) (orice nume, ex. `faceit-rpc`) - **public**.
+2. In [src/app-config.js](src/app-config.js), schimba linia:
    ```js
    const GITHUB_REPO = 'CHANGEME/CHANGEME';
    ```
@@ -47,7 +49,8 @@ Daca folosesti aplicatia .exe cu interfata (vezi mai jos), fisierul `.cfg` se ge
 poate instala automat in CS2 dintr-un singur click, din fereastra de Configurare.
 
 Pentru instalare manuala (mod terminal / daca auto-instalarea nu gaseste folderul):
-1. Ia fisierul gamestate_integration_faceitrpc.cfg (generat langa exe, sau din acest proiect).
+1. Ia fisierul gamestate_integration_faceitrpc.cfg (generat langa exe, sau din
+   [templates/](templates/) daca rulezi din proiect).
 2. Copiaza-l in folderul de configurari al CS2, de obicei:
    C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\csgo\cfg\
    (daca ai instalat Steam in alta parte, cauta folderul csgo\cfg din instalarea jocului)
@@ -61,7 +64,7 @@ catre scriptul tau cat timp esti pe o harta (warmup, live, etc.).
 ## Instalare (mod terminal, pentru dezvoltare)
 
 npm install
-cp .env.example .env
+cp templates/.env.example .env
 # completeaza .env cu datele tale
 npm start
 
@@ -132,6 +135,16 @@ retinuta de Windows.
   date prin GSI - abia cand harta se incarca in joc incepe sa apara scorul live.
 - Scorul afisat e generic (CT/T normalizat ca "tu vs adversar"), fara detalii suplimentare
   (kills, HS% etc.) - pot fi adaugate daca vrei, GSI ofera si statistici per runda.
+
+## Structura proiectului
+
+    src/        - toata logica (main.js = fereastra/tray, presence.js = FACEIT+Discord+GSI,
+                  restul = module mici, cate un rol fiecare: config-store, i18n, update-check...)
+    renderer/   - HTML/CSS/JS pentru cele doua ferestre (panoul din tray si Configurare)
+    build/      - iconita aplicatiei + scripturile care au generat-o
+    assets/     - badge-urile de nivel FACEIT (generate, hostuite pe GitHub pentru Discord)
+    templates/  - fisiere de pornire pentru modul terminal (.env.example, .cfg-ul pentru CS2)
+    dist/       - unde apare exe-ul dupa `npm run dist` (nu e in git, se regenereaza)
 
 ## Idei de extins pe viitor
 

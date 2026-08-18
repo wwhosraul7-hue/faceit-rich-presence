@@ -7,6 +7,7 @@
 
 'use strict';
 
+const path = require('path');
 const presence = require('./presence');
 
 presence.on('status', (text) => {
@@ -16,7 +17,8 @@ presence.on('error', (err) => {
   console.error('Error:', err.message);
 });
 
-const configured = presence.configure(__dirname);
+// __dirname is src/ - .env lives at the project root, one level up.
+const configured = presence.configure(path.join(__dirname, '..'));
 if (!configured) {
   console.error('Missing variables in .env (DISCORD_CLIENT_ID, FACEIT_API_KEY, FACEIT_NICKNAME).');
   process.exit(1);
