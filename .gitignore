@@ -1,0 +1,10 @@
+node_modules/
+dist/
+
+# per-user local config/secrets - never commit
+.env
+cache.json
+app-settings.json
+.autolaunch-set
+
+*.log

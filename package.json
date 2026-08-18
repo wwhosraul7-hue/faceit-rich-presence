@@ -1,0 +1,56 @@
+{
+  "name": "faceit-rpc",
+  "version": "1.0.0",
+  "description": "FACEIT Discord Rich Presence",
+  "main": "main.js",
+  "scripts": {
+    "start": "node index.js",
+    "electron": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord-rpc": "^4.0.1",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.faceitrpc.tray",
+    "productName": "FaceitRPC",
+    "files": [
+      "main.js",
+      "presence.js",
+      "index.js",
+      "config-store.js",
+      "steam-locate.js",
+      "app-config.js",
+      "app-settings.js",
+      "i18n.js",
+      "update-check.js",
+      "renderer/**/*",
+      ".env.example",
+      "gamestate_integration_faceitrpc.cfg",
+      "build/icon.ico",
+      "package.json",
+      "!node_modules/electron",
+      "!node_modules/electron-builder"
+    ],
+    "asar": true,
+    "win": {
+      "target": ["portable"],
+      "icon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "FaceitRPC-Tray.exe"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}

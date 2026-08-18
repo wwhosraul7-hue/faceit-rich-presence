@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+<title>FACEIT RPC</title>
+<link rel="stylesheet" href="panel.css" />
+</head>
+<body>
+  <div class="card">
+    <a class="update-banner" id="update-banner" href="#">
+      <span id="update-text">—</span>
+      <span class="update-arrow">↗</span>
+    </a>
+
+    <header>
+      <div class="identity">
+        <span class="mark"></span>
+        <div>
+          <h1 id="app-title">FACEIT RPC</h1>
+          <p class="status-text" id="status-text">—</p>
+        </div>
+      </div>
+      <div class="lang-switch" id="lang-switch">
+        <button type="button" data-lang="ro" class="lang-btn">RO</button>
+        <button type="button" data-lang="en" class="lang-btn">EN</button>
+      </div>
+    </header>
+
+    <button type="button" id="toggle-btn" class="toggle-btn">
+      <span id="toggle-label">Start</span>
+    </button>
+
+    <nav class="rows">
+      <button type="button" class="row" id="row-settings">
+        <span class="row-icon">⚙</span>
+        <span class="row-label" id="row-settings-label">Configurare</span>
+        <span class="row-chevron">›</span>
+      </button>
+
+      <div class="row" id="row-autolaunch">
+        <span class="row-icon">⏻</span>
+        <span class="row-label" id="row-autolaunch-label">Pornire automata la boot</span>
+        <label class="switch">
+          <input type="checkbox" id="autolaunch-checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <button type="button" class="row" id="row-folder">
+        <span class="row-icon">📂</span>
+        <span class="row-label" id="row-folder-label">Deschide folderul de configurare</span>
+        <span class="row-chevron">›</span>
+      </button>
+    </nav>
+
+    <footer>
+      <button type="button" id="quit-link">Iesire</button>
+    </footer>
+  </div>
+
+  <script src="panel-renderer.js"></script>
+</body>
+</html>
