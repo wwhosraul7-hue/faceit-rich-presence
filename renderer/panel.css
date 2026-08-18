@@ -175,6 +175,22 @@ h1 {
   cursor: default;
 }
 
+.session-row {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin: 0 16px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.session-row.visible {
+  display: flex;
+}
+.session-icon {
+  font-size: 12px;
+}
+
 .elo-chart {
   margin: 0 16px 14px;
   padding: 10px 12px 8px;

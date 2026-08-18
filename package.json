@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/index.js",
     "electron": "electron .",
-    "dist": "electron-builder --win portable"
+    "dist": "electron-builder --win portable",
+    "dist:nsis": "electron-builder --win nsis",
+    "dist:all": "electron-builder --win nsis portable"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +16,7 @@
   "dependencies": {
     "discord-rpc": "^4.0.1",
     "dotenv": "^16.4.5",
+    "electron-updater": "^6.8.9",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -34,12 +37,27 @@
     ],
     "asar": true,
     "win": {
-      "target": ["portable"],
+      "target": ["nsis", "portable"],
       "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "FaceitRPC",
+      "artifactName": "FaceitRPC-Setup.exe"
     },
     "portable": {
       "artifactName": "FaceitRPC-Tray.exe"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "wwhosraul7-hue",
+        "repo": "faceit-rich-presence"
+      }
+    ],
     "directories": {
       "output": "dist"
     }

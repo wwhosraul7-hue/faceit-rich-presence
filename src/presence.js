@@ -35,6 +35,10 @@ function mapImage(mapName) {
   return `https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/${mapName}.png`;
 }
 
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function phaseLabel(phase) {
   switch (phase) {
     case 'warmup':
@@ -65,6 +69,7 @@ class PresenceService extends EventEmitter {
     this.latestGsi = null;
     this._lastGsiSignature = undefined;
     this._lastForcedUpdateAt = 0;
+    this._matchDetailsCache = null; // { matchId, details } - avoids re-fetching the same match repeatedly
     this.running = false;
     this.startTimestamp = null;
     this.lastStatusText = 'Stopped';
@@ -207,18 +212,61 @@ class PresenceService extends EventEmitter {
     try {
       const cache = JSON.parse(fs.readFileSync(this.cacheFile, 'utf8'));
       if (!Array.isArray(cache.eloHistory)) cache.eloHistory = [];
+      if (!cache.session || cache.session.date !== todayKey()) {
+        cache.session = { date: todayKey(), wins: 0, losses: 0 };
+      }
       return cache;
     } catch {
-      return { lastElo: null, lastMatchId: null, lastMatchEloDiff: null, eloHistory: [] };
+      return {
+        lastElo: null,
+        lastMatchId: null,
+        lastMatchEloDiff: null,
+        lastLevel: null,
+        eloHistory: [],
+        session: { date: todayKey(), wins: 0, losses: 0 },
+      };
     }
   }
   _saveCache(data) {
     fs.writeFileSync(this.cacheFile, JSON.stringify(data, null, 2));
   }
 
-  /** Last up to 20 {elo, diff, matchId, timestamp} points, oldest first - for the panel sparkline. */
+  /** Last up to 20 {elo, diff, matchId, timestamp, map, score, won} points, oldest first - for the panel sparkline. */
   getEloHistory() {
     return this._loadCache().eloHistory;
+  }
+
+  /** Last up to `limit` match entries, most recent first - for the Settings window history list. */
+  getMatchHistory(limit = 5) {
+    return this._loadCache().eloHistory.slice(-limit).reverse();
+  }
+
+  /** {date, wins, losses} for today - resets automatically when the calendar day changes. */
+  getSessionStats() {
+    return this._loadCache().session;
+  }
+
+  /** Best-effort win/loss for a match: prefer the actual result, fall back to the ELO diff sign. */
+  _determineWon(matchDetails, playerId, diff) {
+    const winner = matchDetails?.results?.winner; // 'faction1' | 'faction2'
+    if (winner) {
+      const roster1 = matchDetails?.teams?.faction1?.roster || [];
+      const roster2 = matchDetails?.teams?.faction2?.roster || [];
+      if (roster1.some((p) => p.player_id === playerId)) return winner === 'faction1';
+      if (roster2.some((p) => p.player_id === playerId)) return winner === 'faction2';
+    }
+    if (diff != null && diff !== 0) return diff > 0;
+    return null;
+  }
+
+  /** Fetches match details, reusing the last result if it's for the same match. */
+  async _getMatchDetailsCached(matchId) {
+    if (this._matchDetailsCache && this._matchDetailsCache.matchId === matchId) {
+      return this._matchDetailsCache.details;
+    }
+    const details = await this._getMatchDetails(matchId);
+    this._matchDetailsCache = { matchId, details };
+    return details;
   }
 
   // ---------- FACEIT API ----------
@@ -276,8 +324,30 @@ class PresenceService extends EventEmitter {
       }
       cache.lastMatchId = lastMatch.match_id;
 
-      cache.eloHistory.push({ elo, diff, matchId: lastMatch.match_id, timestamp: Date.now() });
+      const matchDetails = await this._getMatchDetailsCached(lastMatch.match_id);
+      const mapKey = matchDetails?.voting?.map?.pick?.[0] || lastMatch.map?.replace(/\s+/g, '_').toLowerCase();
+      const scoreRaw = matchDetails?.results?.score || {};
+      const scoreText = scoreRaw.faction1 != null ? `${scoreRaw.faction1}-${scoreRaw.faction2}` : null;
+      const won = this._determineWon(matchDetails, playerData.player_id, diff);
+
+      cache.eloHistory.push({
+        elo,
+        diff,
+        matchId: lastMatch.match_id,
+        timestamp: Date.now(),
+        map: mapKey || null,
+        score: scoreText,
+        won,
+      });
       if (cache.eloHistory.length > 20) cache.eloHistory = cache.eloHistory.slice(-20);
+
+      if (won === true) cache.session.wins += 1;
+      else if (won === false) cache.session.losses += 1;
+
+      if (cache.lastLevel != null && level > cache.lastLevel) {
+        this.emit('level-up', { level, previousLevel: cache.lastLevel });
+      }
+      cache.lastLevel = level;
 
       // Only notify when there's an actual before/after to compare (not on the very first run).
       if (diff != null && diff !== 0) {
@@ -343,7 +413,7 @@ class PresenceService extends EventEmitter {
       };
     }
 
-    const details = await this._getMatchDetails(lastMatch.match_id);
+    const details = await this._getMatchDetailsCached(lastMatch.match_id);
     const url = this._roomUrl(details) || lastMatch.faceit_url?.replace('{lang}', 'en');
     const mapKey = details?.voting?.map?.pick?.[0] || lastMatch.map?.replace(/\s+/g, '_').toLowerCase();
     const scoreRaw = details?.results?.score || {};

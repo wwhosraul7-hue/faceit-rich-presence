@@ -15,6 +15,8 @@ const els = {
   installGsi: document.getElementById('install-gsi'),
   installResult: document.getElementById('install-result'),
   statusLine: document.getElementById('status-line'),
+  historyList: document.getElementById('history-list'),
+  historyEmpty: document.getElementById('history-empty'),
   langButtons: Array.from(document.querySelectorAll('.lang-btn')),
   togglePasswordBtn: document.getElementById('toggle-password'),
 };
@@ -35,6 +37,8 @@ const TEXT_BINDINGS = {
   'regen-token': 'settingsRegen',
   'install-gsi': 'settingsInstallGsi',
   'cancel': 'settingsCancel',
+  'label-history': 'settingsHistoryLabel',
+  'history-empty': 'settingsHistoryEmpty',
 };
 
 let currentStrings = null;
@@ -114,6 +118,45 @@ function collectValues() {
   };
 }
 
+function formatMapName(mapKey) {
+  if (!mapKey) return '?';
+  return mapKey
+    .replace(/^(de|cs|ar)_/, '')
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function renderMatchHistory(strings, history) {
+  els.historyList.querySelectorAll('.history-row').forEach((el) => el.remove());
+
+  if (!history || history.length === 0) {
+    els.historyEmpty.style.display = '';
+    return;
+  }
+  els.historyEmpty.style.display = 'none';
+
+  for (const match of history) {
+    const row = document.createElement('div');
+    row.className = 'history-row';
+
+    const badge = document.createElement('span');
+    badge.className = 'history-badge ' + (match.won === true ? 'win' : match.won === false ? 'loss' : 'unknown');
+    badge.title = match.won === true ? strings.settingsHistoryWin : match.won === false ? strings.settingsHistoryLoss : '';
+
+    const map = document.createElement('span');
+    map.className = 'history-map';
+    map.textContent = formatMapName(match.map);
+
+    const score = document.createElement('span');
+    score.className = 'history-score';
+    score.textContent = match.score ? match.score.replace('-', ' - ') : '';
+
+    row.append(badge, map, score);
+    els.historyList.appendChild(row);
+  }
+}
+
 async function init() {
   const uiState = await window.api.getUiState();
   applyStrings(uiState.strings);
@@ -130,6 +173,9 @@ async function init() {
 
   const status = await window.api.getStatus();
   els.statusLine.textContent = `${uiState.strings.settingsStatusPrefix}: ${status}`;
+
+  const history = await window.api.getMatchHistory();
+  renderMatchHistory(uiState.strings, history);
 }
 
 window.api.onStatus((text) => {

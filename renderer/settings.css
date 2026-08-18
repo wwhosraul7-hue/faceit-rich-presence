@@ -273,6 +273,58 @@ button:disabled {
   margin-top: 10px;
 }
 
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.history-empty {
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--row-hover);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.history-badge {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.history-badge.win {
+  background: var(--success);
+}
+.history-badge.loss {
+  background: var(--error);
+}
+.history-badge.unknown {
+  background: var(--text-muted);
+}
+
+.history-map {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-score {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .install-result {
   margin: 8px 0 0;
   font-size: 11.5px;

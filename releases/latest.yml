@@ -1,0 +1,8 @@
+version: 1.0.0
+files:
+  - url: FaceitRPC-Setup.exe
+    sha512: IYoT/kpxMXlbG9wKBZqGhFPrTVQ+J0RcKrnps7yPt2xCNoeRsOPzW9rBiPUBXPGM2AYZz7c52i9GpIJqMPrpQw==
+    size: 100647899
+path: FaceitRPC-Setup.exe
+sha512: IYoT/kpxMXlbG9wKBZqGhFPrTVQ+J0RcKrnps7yPt2xCNoeRsOPzW9rBiPUBXPGM2AYZz7c52i9GpIJqMPrpQw==
+releaseDate: '2026-08-18T18:21:35.797Z'

@@ -21,6 +21,7 @@ const appSettingsStore = require('./app-settings');
 const i18n = require('./i18n');
 const { checkForUpdate } = require('./update-check');
 const { findCs2CfgFolders } = require('./steam-locate');
+const { autoUpdater } = require('electron-updater');
 
 const FACEIT_DEVELOPERS_URL = 'https://developers.faceit.com/';
 const DISCORD_DEVELOPERS_URL = 'https://discord.com/developers/applications';
@@ -207,6 +208,7 @@ if (!gotLock) {
       autoLaunch: app.getLoginItemSettings().openAtLogin,
       soundEnabled: appSettings.soundEnabled,
       eloHistory: presence.isConfigured() ? presence.getEloHistory() : [],
+      session: presence.isConfigured() ? presence.getSessionStats() : { wins: 0, losses: 0 },
       update: updateInfo,
     };
   }
@@ -242,11 +244,47 @@ if (!gotLock) {
     }).show();
   }
 
+  /** Native Windows toast + a festive sound in the panel when the FACEIT level goes up. */
+  function showLevelUpNotification({ level }) {
+    if (panelWindow) panelWindow.webContents.send('panel:level-up');
+    if (!Notification.isSupported()) return;
+    const s = i18n.allStrings(appSettings.language);
+    new Notification({
+      title: s.levelUpTitle,
+      body: i18n.t(appSettings.language, 'levelUpBody', { level }),
+      icon: path.join(PROJECT_ROOT, 'build', 'icon.ico'),
+    }).show();
+  }
+
   // ---------- update check ----------
+  // Two layers: electron-updater gives a real "download + restart to install"
+  // flow, but it only works for the NSIS install (it needs the app-update.yml
+  // electron-builder generates for that target - there's nothing to auto-
+  // replace for a portable .exe someone just double-clicks). The simple
+  // GitHub-API check in update-check.js works either way and is the fallback
+  // whenever electron-updater isn't applicable or errors out.
+
+  function setupAutoUpdater() {
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = false;
+
+    autoUpdater.on('update-downloaded', (info) => {
+      updateInfo = { available: true, latestVersion: info.version, readyToInstall: true };
+      pushPanelState();
+    });
+    autoUpdater.on('error', () => {
+      // Not fatal - just means this run isn't NSIS-installed, or GitHub has
+      // no Releases yet. The plain notify-only check below still covers it.
+    });
+  }
 
   async function runUpdateCheck() {
+    if (updateInfo?.readyToInstall) return; // already have a real update staged, don't downgrade the UI
+
+    autoUpdater.checkForUpdates().catch(() => {});
+
     const result = await checkForUpdate(app.getVersion());
-    if (result.checked) {
+    if (result.checked && !updateInfo?.readyToInstall) {
       updateInfo = result.available
         ? { available: true, latestVersion: result.latestVersion, url: result.url }
         : { available: false };
@@ -273,7 +311,11 @@ if (!gotLock) {
     ipcMain.handle('panel:set-language', (_event, lang) => setLanguage(lang));
     ipcMain.handle('panel:open-folder', () => shell.openPath(getBaseDir()));
     ipcMain.handle('panel:open-update', () => {
-      if (updateInfo && updateInfo.url) shell.openExternal(updateInfo.url);
+      if (updateInfo?.readyToInstall) {
+        presence.stop().finally(() => autoUpdater.quitAndInstall());
+      } else if (updateInfo?.url) {
+        shell.openExternal(updateInfo.url);
+      }
     });
     ipcMain.handle('panel:quit', () => {
       presence.stop().finally(() => app.quit());
@@ -288,6 +330,9 @@ if (!gotLock) {
     ipcMain.handle('settings:set-language', (_event, lang) => setLanguage(lang));
     ipcMain.handle('settings:load', () => configStore.loadSettings(getBaseDir()));
     ipcMain.handle('settings:get-status', () => presence.lastStatusText);
+    ipcMain.handle('settings:get-match-history', () =>
+      presence.isConfigured() ? presence.getMatchHistory(5) : []
+    );
     ipcMain.handle('settings:regen-token', () => crypto.randomBytes(16).toString('hex'));
     ipcMain.handle('settings:open-faceit-devs', () => shell.openExternal(FACEIT_DEVELOPERS_URL));
     ipcMain.handle('settings:open-discord-devs', () => shell.openExternal(DISCORD_DEVELOPERS_URL));
@@ -363,6 +408,7 @@ if (!gotLock) {
       refreshTray();
     });
     presence.on('elo-change', showEloNotification);
+    presence.on('level-up', showLevelUpNotification);
 
     registerIpcHandlers();
 
@@ -379,6 +425,7 @@ if (!gotLock) {
 
     refreshTray();
 
+    setupAutoUpdater();
     setTimeout(runUpdateCheck, 5000);
     setInterval(runUpdateCheck, UPDATE_CHECK_INTERVAL_MS);
   });

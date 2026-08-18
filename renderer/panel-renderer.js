@@ -11,6 +11,8 @@ const els = {
   eloChart: document.getElementById('elo-chart'),
   eloChartLabel: document.getElementById('elo-chart-label'),
   eloChartValue: document.getElementById('elo-chart-value'),
+  sessionRow: document.getElementById('session-row'),
+  sessionText: document.getElementById('session-text'),
   sparklineLine: document.getElementById('elo-sparkline-line'),
   sparklineDot: document.getElementById('elo-sparkline-dot'),
   rowSettings: document.getElementById('row-settings'),
@@ -27,6 +29,7 @@ const els = {
 const sounds = {
   start: new Audio('../assets/sounds/start.wav'),
   stop: new Audio('../assets/sounds/stop.wav'),
+  levelUp: new Audio('../assets/sounds/level-up.wav'),
 };
 
 function playSound(name) {
@@ -37,6 +40,27 @@ function playSound(name) {
   } catch {
     // ignore - sound is a nice-to-have, never block Start/Stop on it
   }
+}
+
+function formatTemplate(template, vars) {
+  let text = template;
+  for (const [key, value] of Object.entries(vars)) {
+    text = text.replace(`{${key}}`, value);
+  }
+  return text;
+}
+
+function renderSession(strings, session) {
+  const total = (session?.wins || 0) + (session?.losses || 0);
+  if (!session || total === 0) {
+    els.sessionRow.classList.remove('visible');
+    return;
+  }
+  els.sessionRow.classList.add('visible');
+  els.sessionText.textContent = formatTemplate(strings.panelSessionToday, {
+    wins: session.wins,
+    losses: session.losses,
+  });
 }
 
 function renderEloChart(history) {
@@ -100,10 +124,12 @@ function render(state) {
   els.soundCheckbox.checked = state.soundEnabled;
 
   renderEloChart(state.eloHistory);
+  renderSession(s, state.session);
 
   if (state.update && state.update.available) {
     els.updateBanner.classList.add('visible');
-    els.updateText.textContent = `${s.panelUpdateAvailable} (v${state.update.latestVersion})`;
+    const label = state.update.readyToInstall ? s.panelUpdateReady : s.panelUpdateAvailable;
+    els.updateText.textContent = `${label} (v${state.update.latestVersion})`;
   } else {
     els.updateBanner.classList.remove('visible');
   }
@@ -126,6 +152,10 @@ async function init() {
 window.panelApi.onState((state) => {
   currentState = state;
   render(state);
+});
+
+window.panelApi.onLevelUp(() => {
+  if (currentState?.soundEnabled) playSound('levelUp');
 });
 
 els.toggleBtn.addEventListener('click', () => {

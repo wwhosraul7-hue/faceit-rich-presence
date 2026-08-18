@@ -23,6 +23,7 @@ const STRINGS = {
   panelOpenFolder: { ro: 'Deschide folderul de configurare', en: 'Open the config folder' },
   panelQuit: { ro: 'Iesire', en: 'Quit' },
   panelUpdateAvailable: { ro: 'Versiune noua disponibila', en: 'New version available' },
+  panelUpdateReady: { ro: 'Actualizare gata - click sa repornesti', en: 'Update ready - click to restart' },
   panelUpdateDownload: { ro: 'Descarca', en: 'Download' },
   panelUpToDate: { ro: 'Ai ultima versiune', en: "You're up to date" },
   panelLanguage: { ro: 'Limba', en: 'Language' },
@@ -105,6 +106,17 @@ const STRINGS = {
   // panel: sound toggle + ELO sparkline
   panelSound: { ro: 'Sunet la Start/Stop', en: 'Sound on Start/Stop' },
   panelEloChart: { ro: 'Evolutie ELO', en: 'ELO trend' },
+  panelSessionToday: { ro: '{wins}W - {losses}L azi', en: '{wins}W - {losses}L today' },
+
+  // level-up notification
+  levelUpTitle: { ro: 'Nivel nou!', en: 'New level!' },
+  levelUpBody: { ro: 'Ai urcat la Nivel {level} pe FACEIT', en: "You've reached Level {level} on FACEIT" },
+
+  // settings: match history
+  settingsHistoryLabel: { ro: 'Ultimele meciuri', en: 'Recent matches' },
+  settingsHistoryEmpty: { ro: 'Inca niciun meci inregistrat.', en: 'No matches recorded yet.' },
+  settingsHistoryWin: { ro: 'Victorie', en: 'Win' },
+  settingsHistoryLoss: { ro: 'Infrangere', en: 'Loss' },
 };
 
 function t(lang, key, vars) {

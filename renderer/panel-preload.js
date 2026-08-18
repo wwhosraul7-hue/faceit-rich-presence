@@ -15,4 +15,5 @@ contextBridge.exposeInMainWorld('panelApi', {
   quit: () => ipcRenderer.invoke('panel:quit'),
   reportHeight: (height) => ipcRenderer.send('panel:report-height', height),
   onState: (callback) => ipcRenderer.on('panel:state-changed', (_event, state) => callback(state)),
+  onLevelUp: (callback) => ipcRenderer.on('panel:level-up', () => callback()),
 });

@@ -23,10 +23,17 @@ repo-uri private, deci badge-ul si update-check-ul nu ar functiona pe un repo pr
    git branch -M main
    git push -u origin main
    ```
-4. La fiecare versiune noua: schimba `"version"` din [package.json](package.json), `npm run dist`,
-   apoi pe GitHub -> Releases -> "Draft a new release" -> pune un tag `vX.Y.Z` -> urca
-   `dist\FaceitRPC-Tray.exe` ca asset -> Publish. Aplicatia verifica automat Release-ul cel
-   mai recent si arata un banner cu link de descarcare cand exista o versiune mai noua.
+4. La fiecare versiune noua:
+   1. Schimba `"version"` din [package.json](package.json) (ex. `1.1.0`).
+   2. `npm run dist:all` (construieste ambele variante: instalator NSIS + portable).
+   3. Pe GitHub -> Releases -> "Draft a new release" -> tag `vX.Y.Z` -> urca din `dist\`:
+      `FaceitRPC-Setup.exe`, `FaceitRPC-Tray.exe`, **si** `latest.yml` (fisierul YAML e
+      obligatoriu - fara el, auto-update-ul real nu gaseste versiunea noua) -> Publish.
+
+   Cine a instalat cu `FaceitRPC-Setup.exe` primeste update-ul **automat** (se descarca
+   singur, iar la click pe bannerul din panou aplicatia reporeste si se actualizeaza).
+   Cine foloseste `FaceitRPC-Tray.exe` portabil primeste doar o notificare cu link -
+   trebuie sa descarce manual versiunea noua (variantele portabile nu se pot auto-inlocui).
 
 Pana completezi pasul 2, aplicatia functioneaza normal, doar fara badge de nivel si fara
 notificare de update (nu crapa, pur si simplu le sare).
@@ -80,14 +87,20 @@ deschis un terminal.
 ### Cum se construieste exe-ul
 
 npm install
-npm run dist
+npm run dist:all
 
-Rezultatul apare in `dist\FaceitRPC-Tray.exe` (un singur fisier, ~90 MB, contine tot ce
-trebuie - nu are nevoie de Node.js instalat pe masina care il ruleaza).
+Rezultatul apare in `dist\`:
+- **`FaceitRPC-Setup.exe`** - instalator normal (Start Menu, scurtatura pe desktop,
+  dezinstalare din Control Panel ca orice aplicatie Windows). **Recomandat** - e singura
+  varianta care se poate actualiza singura (vezi sectiunea GitHub de mai sus).
+- **`FaceitRPC-Tray.exe`** - varianta portabila, un singur fisier, fara instalare. Utila
+  daca nu vrei/nu poti instala nimic, dar update-urile trebuie descarcate manual.
+
+(`npm run dist` construieste doar portable, `npm run dist:nsis` doar instalatorul.)
 
 ### Cum se foloseste (inclusiv daca dai aplicatia mai departe altcuiva)
 
-1. Muta `FaceitRPC-Tray.exe` unde vrei (ex: `Documents\FaceitRPC\`) si porneste-l.
+1. Ruleaza `FaceitRPC-Setup.exe` (sau `FaceitRPC-Tray.exe` daca preferi portabil).
 2. La prima pornire apare un icon portocaliu "F" in system tray SI se deschide automat
    fereastra de **Configurare** - nu trebuie editat niciun fisier text de mana.
 3. In fereastra, completeaza:
@@ -96,8 +109,6 @@ trebuie - nu are nevoie de Node.js instalat pe masina care il ruleaza).
    - **Nickname FACEIT**.
    - Restul campurilor (Discord Application ID, interval, port, token GSI) sunt deja
      completate cu valori care functioneaza - le poti lasa asa (sunt sub "Setari avansate").
-   - Poti alege si o **culoare pentru badge-ul de nivel FACEIT** (portocaliu/albastru/mov) -
-     iconita mica ce apare peste harta pe Rich Presence.
 4. Apasa **"Instaleaza automat fisierul GSI in CS2"** - cauta singur folderul CS2 (inclusiv pe
    alte drive-uri/librarii Steam) si copiaza fisierul acolo. Daca nu il gaseste, iti spune sa
    il copiezi manual (vezi sectiunea de mai sus).
@@ -107,18 +118,28 @@ trebuie - nu are nevoie de Node.js instalat pe masina care il ruleaza).
 
 Click stanga pe icon deschide un panou mic langa tray (nu un meniu clasic Windows):
 - **Start / Stop** - buton mare, porneste/opreste actualizarea presence-ului.
-- **Configurare** - deschide fereastra de mai sus, ca sa schimbi datele oricand.
+- **Record sesiune** - "3W - 1L azi", cate meciuri ai castigat/pierdut de cand ai deschis
+  aplicatia (se reseteaza in fiecare zi).
+- **Grafic ELO** - evolutia ultimelor ~20 de meciuri, sub forma de linie.
+- **Configurare** - deschide fereastra de mai sus, ca sa schimbi datele oricand. Acolo
+  gasesti si **ultimele 5 meciuri** (harta, scor, victorie/infrangere).
 - **Pornire automata la boot** - comutator; bifat implicit de la prima rulare.
+- **Sunet la Start/Stop** - comutator, dezactivat implicit; plus un sunet separat, mai
+  festiv, cand urci de nivel FACEIT.
 - **Deschide folderul de configurare** - deschide folderul cu `.env`, `.cfg` si cache.
 - **RO / EN** (sus-dreapta) - schimba limba interfetei (panou + fereastra de configurare).
 - **Iesire** (jos) - opreste presence-ul si inchide aplicatia.
-- Cand exista o versiune noua pe GitHub, apare un banner sus in panou cu link de descarcare.
+- Cand exista o versiune noua: banner sus in panou - descarca automat si te lasa sa
+  repornesti cu un click (instalator) sau iti da un link de descarcare (portable).
 
 Click-dreapta pe icon ramane si un meniu clasic minimal (Configurare / Iesire), ca rezerva.
 
-Daca muti exe-ul in alt folder dupa ce ai activat pornirea automata, redeschide-l o data
-din noua locatie (sau debifeaza/rebifeaza optiunea din panou) ca sa se actualizeze calea
-retinuta de Windows.
+Primesti si o **notificare Windows** cand se schimba ELO-ul sau cand urci de nivel dupa un
+meci, chiar daca nu te uiti pe Discord in momentul respectiv.
+
+Daca folosesti varianta portabila si o muti in alt folder dupa ce ai activat pornirea
+automata, redeschide-o o data din noua locatie (sau debifeaza/rebifeaza optiunea din panou)
+ca sa se actualizeze calea retinuta de Windows.
 
 ## Cum functioneaza afisarea (ordinea de prioritate)
 
@@ -141,10 +162,12 @@ retinuta de Windows.
     src/        - toata logica (main.js = fereastra/tray, presence.js = FACEIT+Discord+GSI,
                   restul = module mici, cate un rol fiecare: config-store, i18n, update-check...)
     renderer/   - HTML/CSS/JS pentru cele doua ferestre (panoul din tray si Configurare)
-    build/      - iconita aplicatiei + scripturile care au generat-o
-    assets/     - badge-urile de nivel FACEIT (generate, hostuite pe GitHub pentru Discord)
+    build/      - iconita aplicatiei + scripturile care au generat-o (icon, badge-uri, sunete)
+    assets/     - logo + iconitele de nivel FACEIT si sunetele (hostuite pe GitHub pentru Discord,
+                  sau incluse in exe pentru sunete - vezi assets/README.md)
     templates/  - fisiere de pornire pentru modul terminal (.env.example, .cfg-ul pentru CS2)
-    dist/       - unde apare exe-ul dupa `npm run dist` (nu e in git, se regenereaza)
+    releases/   - build-uri urcate manual (Git LFS) ca alternativa daca atasarea din chat nu merge
+    dist/       - unde apar exe-urile dupa `npm run dist:all` (nu e in git, se regenereaza)
 
 ## Idei de extins pe viitor
 

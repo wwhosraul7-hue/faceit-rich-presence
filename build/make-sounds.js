@@ -30,6 +30,22 @@ function noteBuffer(freq, durationMs, { volume = 0.5, vibrato = 6, vibratoDepth 
   return samples;
 }
 
+function chordBuffer(freqs, durationMs, { volume = 0.4, vibrato = 6, vibratoDepth = 4 } = {}) {
+  const n = Math.round((SAMPLE_RATE * durationMs) / 1000);
+  const samples = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const t = i / SAMPLE_RATE;
+    const vibratoOffset = vibratoDepth * Math.sin(2 * Math.PI * vibrato * t);
+    const attack = Math.min(1, i / (SAMPLE_RATE * 0.01));
+    const decay = Math.exp(-2.2 * (i / n));
+    const envelope = attack * decay;
+    let sum = 0;
+    for (const freq of freqs) sum += Math.sin(2 * Math.PI * (freq + vibratoOffset) * t);
+    samples[i] = (sum / freqs.length) * volume * envelope;
+  }
+  return samples;
+}
+
 function concat(buffers, gapMs = 8) {
   const gapSamples = Math.round((SAMPLE_RATE * gapMs) / 1000);
   const total = buffers.reduce((sum, b) => sum + b.length, 0) + gapSamples * (buffers.length - 1);
@@ -70,7 +86,15 @@ function writeWav(filePath, floatSamples) {
 }
 
 // E4 - F4 - G#4 - B4: augmented-2nd (F -> G#) gives the "hora" flavor.
-const NOTES = { E4: 329.63, F4: 349.23, GS4: 415.3, B4: 493.88 };
+const NOTES = {
+  E4: 329.63,
+  F4: 349.23,
+  GS4: 415.3,
+  B4: 493.88,
+  E5: 659.25,
+  GS5: 830.61,
+  B5: 987.77,
+};
 
 const outDir = path.join(__dirname, '..', 'assets', 'sounds');
 fs.mkdirSync(outDir, { recursive: true });
@@ -91,4 +115,16 @@ const stopSeq = concat([
 ]);
 writeWav(path.join(outDir, 'stop.wav'), stopSeq);
 
-console.log('Wrote', path.join(outDir, 'start.wav'), 'and stop.wav');
+// Level up: the same run continued a full octave higher, landing on a bright
+// three-note chord - more of a "fanfare" than the plain Start/Stop chimes.
+const levelUpSeq = concat([
+  noteBuffer(NOTES.E4, 55),
+  noteBuffer(NOTES.F4, 55),
+  noteBuffer(NOTES.GS4, 55),
+  noteBuffer(NOTES.B4, 55),
+  noteBuffer(NOTES.E5, 70, { volume: 0.55 }),
+  chordBuffer([NOTES.E5, NOTES.GS5, NOTES.B5], 420, { volume: 0.45 }),
+]);
+writeWav(path.join(outDir, 'level-up.wav'), levelUpSeq);
+
+console.log('Wrote start.wav, stop.wav, and level-up.wav in', outDir);
