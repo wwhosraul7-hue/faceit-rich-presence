@@ -182,13 +182,20 @@ class PresenceService extends EventEmitter {
   // ---------- local cache (so we know the ELO from the last check) ----------
   _loadCache() {
     try {
-      return JSON.parse(fs.readFileSync(this.cacheFile, 'utf8'));
+      const cache = JSON.parse(fs.readFileSync(this.cacheFile, 'utf8'));
+      if (!Array.isArray(cache.eloHistory)) cache.eloHistory = [];
+      return cache;
     } catch {
-      return { lastElo: null, lastMatchId: null, lastMatchEloDiff: null };
+      return { lastElo: null, lastMatchId: null, lastMatchEloDiff: null, eloHistory: [] };
     }
   }
   _saveCache(data) {
     fs.writeFileSync(this.cacheFile, JSON.stringify(data, null, 2));
+  }
+
+  /** Last up to 20 {elo, diff, matchId, timestamp} points, oldest first - for the panel sparkline. */
+  getEloHistory() {
+    return this._loadCache().eloHistory;
   }
 
   // ---------- FACEIT API ----------
@@ -240,10 +247,19 @@ class PresenceService extends EventEmitter {
     const lastMatch = await this._getLastMatch(playerData.player_id);
 
     if (lastMatch && lastMatch.match_id !== cache.lastMatchId) {
-      if (cache.lastElo != null) {
-        cache.lastMatchEloDiff = elo - cache.lastElo;
+      const diff = cache.lastElo != null ? elo - cache.lastElo : null;
+      if (diff != null) {
+        cache.lastMatchEloDiff = diff;
       }
       cache.lastMatchId = lastMatch.match_id;
+
+      cache.eloHistory.push({ elo, diff, matchId: lastMatch.match_id, timestamp: Date.now() });
+      if (cache.eloHistory.length > 20) cache.eloHistory = cache.eloHistory.slice(-20);
+
+      // Only notify when there's an actual before/after to compare (not on the very first run).
+      if (diff != null && diff !== 0) {
+        this.emit('elo-change', { diff, elo, level });
+      }
     }
     cache.lastElo = elo;
     this._saveCache(cache);

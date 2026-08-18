@@ -11,7 +11,7 @@
 
 'use strict';
 
-const { app, Tray, Menu, shell, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, Tray, Menu, shell, BrowserWindow, ipcMain, screen, Notification } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -205,6 +205,8 @@ if (!gotLock) {
       running: presence.isRunning(),
       configured: presence.isConfigured(),
       autoLaunch: app.getLoginItemSettings().openAtLogin,
+      soundEnabled: appSettings.soundEnabled,
+      eloHistory: presence.isConfigured() ? presence.getEloHistory() : [],
       update: updateInfo,
     };
   }
@@ -226,6 +228,18 @@ if (!gotLock) {
     if (!tray) return;
     tray.setToolTip(`FACEIT RPC — ${presence.lastStatusText}`);
     pushPanelState();
+  }
+
+  /** Native Windows toast when the FACEIT ELO changes after a match - no external service involved. */
+  function showEloNotification({ diff, elo, level }) {
+    if (!Notification.isSupported()) return;
+    const s = i18n.allStrings(appSettings.language);
+    const sign = diff > 0 ? '+' : '';
+    new Notification({
+      title: diff > 0 ? s.eloNotifTitleUp : s.eloNotifTitleDown,
+      body: i18n.t(appSettings.language, 'eloNotifBody', { sign, diff, elo, level }),
+      icon: path.join(PROJECT_ROOT, 'build', 'icon.ico'),
+    }).show();
   }
 
   // ---------- update check ----------
@@ -250,6 +264,10 @@ if (!gotLock) {
     ipcMain.handle('panel:open-settings', () => openSettingsWindow());
     ipcMain.handle('panel:toggle-autolaunch', (_event, checked) => {
       app.setLoginItemSettings({ openAtLogin: checked, path: getLaunchTarget() });
+      pushPanelState();
+    });
+    ipcMain.handle('panel:toggle-sound', (_event, checked) => {
+      appSettings = appSettingsStore.save(getBaseDir(), { soundEnabled: checked });
       pushPanelState();
     });
     ipcMain.handle('panel:set-language', (_event, lang) => setLanguage(lang));
@@ -344,6 +362,7 @@ if (!gotLock) {
       console.error('Presence error:', err.message);
       refreshTray();
     });
+    presence.on('elo-change', showEloNotification);
 
     registerIpcHandlers();
 

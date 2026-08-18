@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('panelApi', {
   stop: () => ipcRenderer.invoke('panel:stop'),
   openSettings: () => ipcRenderer.invoke('panel:open-settings'),
   toggleAutoLaunch: (checked) => ipcRenderer.invoke('panel:toggle-autolaunch', checked),
+  toggleSound: (checked) => ipcRenderer.invoke('panel:toggle-sound', checked),
   setLanguage: (lang) => ipcRenderer.invoke('panel:set-language', lang),
   openFolder: () => ipcRenderer.invoke('panel:open-folder'),
   openUpdate: () => ipcRenderer.invoke('panel:open-update'),

@@ -31,6 +31,17 @@
       <span id="toggle-label">Start</span>
     </button>
 
+    <div class="elo-chart" id="elo-chart">
+      <div class="elo-chart-head">
+        <span id="elo-chart-label">Evolutie ELO</span>
+        <span class="elo-chart-value" id="elo-chart-value"></span>
+      </div>
+      <svg id="elo-sparkline" viewBox="0 0 280 40" preserveAspectRatio="none">
+        <polyline id="elo-sparkline-line" points="" />
+        <circle id="elo-sparkline-dot" r="2.5" />
+      </svg>
+    </div>
+
     <nav class="rows">
       <button type="button" class="row" id="row-settings">
         <span class="row-icon">⚙</span>
@@ -43,6 +54,15 @@
         <span class="row-label" id="row-autolaunch-label">Pornire automata la boot</span>
         <label class="switch">
           <input type="checkbox" id="autolaunch-checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="row" id="row-sound">
+        <span class="row-icon">🔊</span>
+        <span class="row-label" id="row-sound-label">Sunet la Start/Stop</span>
+        <label class="switch">
+          <input type="checkbox" id="sound-checkbox" />
           <span class="slider"></span>
         </label>
       </div>

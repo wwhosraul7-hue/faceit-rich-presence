@@ -1,7 +1,8 @@
 /**
- * App-level preferences that aren't FACEIT/Discord config: just the UI
- * language for now. Stored separately from .env in a small JSON file next
- * to it, so config-store.js stays focused on the .env / .cfg pair.
+ * App-level preferences that aren't FACEIT/Discord config: UI language and
+ * whether to play a sound on Start/Stop. Stored separately from .env in a
+ * small JSON file next to it, so config-store.js stays focused on the
+ * .env / .cfg pair.
  */
 
 'use strict';
@@ -11,6 +12,7 @@ const path = require('path');
 
 const DEFAULTS = {
   language: 'ro',
+  soundEnabled: false,
 };
 
 const LANGUAGES = ['ro', 'en'];
@@ -24,6 +26,7 @@ function load(baseDir) {
     const raw = JSON.parse(fs.readFileSync(filePath(baseDir), 'utf8'));
     return {
       language: LANGUAGES.includes(raw.language) ? raw.language : DEFAULTS.language,
+      soundEnabled: typeof raw.soundEnabled === 'boolean' ? raw.soundEnabled : DEFAULTS.soundEnabled,
     };
   } catch {
     return { ...DEFAULTS };

@@ -93,6 +93,18 @@ const STRINGS = {
     en: 'Installed in: {folders}. Restart CS2 if it was open.',
   },
   searchingCs2: { ro: 'Se cauta folderul CS2...', en: 'Looking for the CS2 folder...' },
+
+  // ELO change notification
+  eloNotifTitleUp: { ro: 'ELO in crestere', en: 'ELO increased' },
+  eloNotifTitleDown: { ro: 'ELO in scadere', en: 'ELO decreased' },
+  eloNotifBody: {
+    ro: '{sign}{diff} ELO -> acum {elo} (Nivel {level})',
+    en: '{sign}{diff} ELO -> now {elo} (Level {level})',
+  },
+
+  // panel: sound toggle + ELO sparkline
+  panelSound: { ro: 'Sunet la Start/Stop', en: 'Sound on Start/Stop' },
+  panelEloChart: { ro: 'Evolutie ELO', en: 'ELO trend' },
 };
 
 function t(lang, key, vars) {
