@@ -82,6 +82,11 @@ if (!gotLock) {
   }
 
   // ---------- windows ----------
+  // Note: deliberately no `backgroundMaterial: 'acrylic'` here. On Windows it
+  // paints the *whole* window rectangle regardless of CSS border-radius/alpha,
+  // which shows up as a square ghost box around the rounded card. The frosted
+  // look instead comes purely from `transparent: true` + CSS backdrop-filter
+  // blur in panel.css/settings.css, which respects the rounded shape.
 
   function createPanelWindow() {
     panelWindow = new BrowserWindow({
@@ -95,7 +100,6 @@ if (!gotLock) {
       skipTaskbar: true,
       alwaysOnTop: true,
       hasShadow: false,
-      backgroundMaterial: 'acrylic',
       webPreferences: {
         preload: path.join(__dirname, 'renderer', 'panel-preload.js'),
         contextIsolation: true,
@@ -164,7 +168,6 @@ if (!gotLock) {
       frame: false,
       transparent: true,
       hasShadow: false,
-      backgroundMaterial: 'acrylic',
       icon: path.join(__dirname, 'build', 'icon.ico'),
       title: 'FACEIT RPC — Configurare',
       webPreferences: {

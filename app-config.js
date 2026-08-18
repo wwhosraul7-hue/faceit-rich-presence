@@ -8,7 +8,7 @@
 'use strict';
 
 // e.g. 'wwhosraul7/faceit-rpc' - owner/repo, no URL, no trailing slash.
-const GITHUB_REPO = 'CHANGEME/CHANGEME';
+const GITHUB_REPO = 'wwhosraul7-hue/faceit-rich-presence';
 
 function isGithubRepoConfigured() {
   return GITHUB_REPO !== 'CHANGEME/CHANGEME' && /^[^/\s]+\/[^/\s]+$/.test(GITHUB_REPO);
