@@ -63,6 +63,8 @@ class PresenceService extends EventEmitter {
     this.pollTimer = null;
     this.reconnectTimer = null;
     this.latestGsi = null;
+    this._lastGsiSignature = undefined;
+    this._lastForcedUpdateAt = 0;
     this.running = false;
     this.startTimestamp = null;
     this.lastStatusText = 'Stopped';
@@ -138,6 +140,7 @@ class PresenceService extends EventEmitter {
           const player = payload.player;
           if (!map || !map.name) {
             this.latestGsi = null; // not on any map (main menu etc.)
+            this._maybeForceUpdate('none');
             return;
           }
 
@@ -155,6 +158,12 @@ class PresenceService extends EventEmitter {
             side,
             updatedAt: Date.now(),
           };
+
+          // Don't wait for the next poll tick to reflect a new match/round -
+          // push right away when something visible actually changed (a new
+          // map means "started a new match right after the last one"), but
+          // debounced so a burst of GSI packets can't spam the FACEIT API.
+          this._maybeForceUpdate(`${map.name}|${map.phase}|${scoreUs}-${scoreThem}`);
         } catch {
           // malformed packet, ignore
         }
@@ -171,6 +180,20 @@ class PresenceService extends EventEmitter {
     });
 
     this.gsiServer = server;
+  }
+
+  /** Push a fresh Discord activity right away when the GSI state actually changed (min 3s apart). */
+  _maybeForceUpdate(signature) {
+    if (!this.running || !this.client) return;
+    if (signature === this._lastGsiSignature) return;
+    this._lastGsiSignature = signature;
+
+    const FORCE_UPDATE_MIN_GAP_MS = 3000;
+    const now = Date.now();
+    if (now - this._lastForcedUpdateAt < FORCE_UPDATE_MIN_GAP_MS) return;
+    this._lastForcedUpdateAt = now;
+
+    this._updatePresence();
   }
 
   _getLiveGsiState() {
