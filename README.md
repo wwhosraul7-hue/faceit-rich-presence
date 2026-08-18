@@ -4,6 +4,31 @@ Arata pe profilul tau Discord: nivel FACEIT, ELO, diferenta de ELO, iar cat timp
 scorul LIVE (tu vs adversar), harta curenta si faza rundei - luate direct din CS2 prin
 Game State Integration (GSI), sistemul oficial Valve pentru asta.
 
+## Setup GitHub (o singura data, obligatoriu pentru badge-ul de nivel + notificarea de update)
+
+Badge-ul de nivel FACEIT (iconita mica peste harta) si notificarea "versiune noua disponibila"
+au nevoie de un repo GitHub public sau privat unde tii pozele si dai Release-uri.
+
+1. Creeaza un repo gol pe [github.com/new](https://github.com/new) (orice nume, ex. `faceit-rpc`).
+2. In [app-config.js](app-config.js), schimba linia:
+   ```js
+   const GITHUB_REPO = 'CHANGEME/CHANGEME';
+   ```
+   in `'username-ul-tau/numele-repo-ului'`.
+3. Din acest folder:
+   ```bash
+   git remote add origin https://github.com/<username>/<repo>.git
+   git branch -M main
+   git push -u origin main
+   ```
+4. La fiecare versiune noua: schimba `"version"` din [package.json](package.json), `npm run dist`,
+   apoi pe GitHub -> Releases -> "Draft a new release" -> pune un tag `vX.Y.Z` -> urca
+   `dist\FaceitRPC-Tray.exe` ca asset -> Publish. Aplicatia verifica automat Release-ul cel
+   mai recent si arata un banner cu link de descarcare cand exista o versiune mai noua.
+
+Pana completezi pasul 2, aplicatia functioneaza normal, doar fara badge de nivel si fara
+notificare de update (nu crapa, pur si simplu le sare).
+
 ## De ce ai nevoie
 
 ### 1. Aplicatie Discord
@@ -68,21 +93,28 @@ trebuie - nu are nevoie de Node.js instalat pe masina care il ruleaza).
    - **Nickname FACEIT**.
    - Restul campurilor (Discord Application ID, interval, port, token GSI) sunt deja
      completate cu valori care functioneaza - le poti lasa asa (sunt sub "Setari avansate").
+   - Poti alege si o **culoare pentru badge-ul de nivel FACEIT** (portocaliu/albastru/mov) -
+     iconita mica ce apare peste harta pe Rich Presence.
 4. Apasa **"Instaleaza automat fisierul GSI in CS2"** - cauta singur folderul CS2 (inclusiv pe
    alte drive-uri/librarii Steam) si copiaza fisierul acolo. Daca nu il gaseste, iti spune sa
    il copiezi manual (vezi sectiunea de mai sus).
 5. Apasa **"Salveaza si porneste"** - scrie `.env` + `.cfg`, iar presence-ul porneste automat.
 
-Meniul din tray (click-dreapta pe icon):
-- **Start / Stop** - porneste sau opreste actualizarea presence-ului.
-- **Configurare...** - redeschide fereastra oricand, ca sa schimbi datele.
-- **Pornire automata la boot (login Windows)** - bifata implicit de la prima rulare;
-  poti debifa oricand.
+### Interfata (click stanga pe icon-ul din tray)
+
+Click stanga pe icon deschide un panou mic langa tray (nu un meniu clasic Windows):
+- **Start / Stop** - buton mare, porneste/opreste actualizarea presence-ului.
+- **Configurare** - deschide fereastra de mai sus, ca sa schimbi datele oricand.
+- **Pornire automata la boot** - comutator; bifat implicit de la prima rulare.
 - **Deschide folderul de configurare** - deschide folderul cu `.env`, `.cfg` si cache.
-- **Iesire** - opreste presence-ul si inchide aplicatia.
+- **RO / EN** (sus-dreapta) - schimba limba interfetei (panou + fereastra de configurare).
+- **Iesire** (jos) - opreste presence-ul si inchide aplicatia.
+- Cand exista o versiune noua pe GitHub, apare un banner sus in panou cu link de descarcare.
+
+Click-dreapta pe icon ramane si un meniu clasic minimal (Configurare / Iesire), ca rezerva.
 
 Daca muti exe-ul in alt folder dupa ce ai activat pornirea automata, redeschide-l o data
-din noua locatie (sau debifeaza/rebifeaza optiunea din meniu) ca sa se actualizeze calea
+din noua locatie (sau debifeaza/rebifeaza optiunea din panou) ca sa se actualizeze calea
 retinuta de Windows.
 
 ## Cum functioneaza afisarea (ordinea de prioritate)
