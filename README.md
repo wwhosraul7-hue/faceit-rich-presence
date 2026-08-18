@@ -1,0 +1,1 @@
+# faceit-rich-presence
