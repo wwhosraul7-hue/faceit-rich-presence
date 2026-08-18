@@ -108,11 +108,9 @@ if (!gotLock) {
     // window (Windows quirk) - block manual drag-resize, but allow our own setSize calls.
     // ('will-resize' only fires for user-driven resizes, not programmatic ones.)
     panelWindow.on('will-resize', (event) => event.preventDefault());
-    if (!process.env.FACEITRPC_DEBUG_SHOW_PANEL) {
-      panelWindow.on('blur', () => {
-        if (panelWindow && !panelWindow.webContents.isDevToolsFocused()) panelWindow.hide();
-      });
-    }
+    panelWindow.on('blur', () => {
+      if (panelWindow && !panelWindow.webContents.isDevToolsFocused()) panelWindow.hide();
+    });
   }
 
   function positionPanel() {
@@ -341,16 +339,6 @@ if (!gotLock) {
     tray.on('right-click', () => tray.popUpContextMenu(buildMinimalTrayMenu()));
 
     createPanelWindow();
-    if (process.env.FACEITRPC_DEBUG_SHOW_PANEL) {
-      panelWindow.webContents.once('did-finish-load', () => {
-        panelWindow.setPosition(200, 200);
-        panelWindow.show();
-        panelWindow.focus();
-      });
-    }
-    if (process.env.FACEITRPC_DEBUG_SHOW_SETTINGS) {
-      setTimeout(() => openSettingsWindow(), 1500);
-    }
 
     presence.on('status', refreshTray);
     presence.on('error', (err) => {
