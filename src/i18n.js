@@ -60,7 +60,6 @@ const STRINGS = {
     en: 'Generated automatically. Written identically into the CS2 .cfg file.',
   },
   settingsRegen: { ro: 'Regenereaza', en: 'Regenerate' },
-  settingsBadgePaletteLabel: { ro: 'Culoare badge nivel FACEIT', en: 'FACEIT level badge color' },
   settingsInstallGsi: { ro: 'Instaleaza automat fisierul GSI in CS2', en: 'Auto-install the GSI file into CS2' },
   settingsCancel: { ro: 'Inchide', en: 'Close' },
   settingsSave: { ro: 'Salveaza si porneste', en: 'Save and start' },

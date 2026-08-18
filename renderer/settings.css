@@ -229,32 +229,6 @@ input:focus {
   display: none;
 }
 
-.palette-row {
-  display: flex;
-  gap: 10px;
-}
-
-.swatch {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
-}
-.swatch-orange {
-  background: linear-gradient(145deg, #ffb37a, #b32a00);
-}
-.swatch-blue {
-  background: linear-gradient(145deg, #bfdfff, #0b3d91);
-}
-.swatch-purple {
-  background: linear-gradient(145deg, #e4d1ff, #5b21b6);
-}
-.swatch.selected {
-  border-color: var(--text);
-}
-
 button {
   font-family: inherit;
   font-size: 13px;

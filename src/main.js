@@ -77,12 +77,6 @@ if (!gotLock) {
     pushSettingsLanguage();
   }
 
-  function setBadgePalette(palette) {
-    if (!appSettingsStore.PALETTES.includes(palette)) return;
-    appSettings = appSettingsStore.save(getBaseDir(), { badgePalette: palette });
-    presence.setBadgePalette(palette);
-  }
-
   // ---------- windows ----------
   // Note: deliberately no `backgroundMaterial: 'acrylic'` here. On Windows it
   // paints the *whole* window rectangle regardless of CSS border-radius/alpha,
@@ -272,10 +266,8 @@ if (!gotLock) {
     ipcMain.handle('settings:get-ui-state', () => ({
       language: appSettings.language,
       strings: i18n.allStrings(appSettings.language),
-      badgePalette: appSettings.badgePalette,
     }));
     ipcMain.handle('settings:set-language', (_event, lang) => setLanguage(lang));
-    ipcMain.handle('settings:set-palette', (_event, palette) => setBadgePalette(palette));
     ipcMain.handle('settings:load', () => configStore.loadSettings(getBaseDir()));
     ipcMain.handle('settings:get-status', () => presence.lastStatusText);
     ipcMain.handle('settings:regen-token', () => crypto.randomBytes(16).toString('hex'));
@@ -355,7 +347,6 @@ if (!gotLock) {
 
     registerIpcHandlers();
 
-    presence.setBadgePalette(appSettings.badgePalette);
     const configured = presence.configure(baseDir);
     refreshTray();
 

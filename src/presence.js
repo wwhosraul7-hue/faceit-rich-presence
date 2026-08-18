@@ -17,15 +17,16 @@ const path = require('path');
 const EventEmitter = require('events');
 const dotenv = require('dotenv');
 const RPC = require('discord-rpc');
-const { badgeUrl } = require('./app-config');
+const { levelIconUrl, faceitLogoUrl } = require('./app-config');
 
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 
-// FACEIT logo, hosted on Wikimedia Commons (CC BY 4.0), used as the default/idle image.
-// Direct upload.wikimedia.org URL, not the commons.wikimedia.org/.../Special:FilePath
-// redirect wrapper - Discord's asset resolver doesn't reliably follow that redirect
-// chain (302 -> 301 -> the real file), which showed up as a broken image in Rich Presence.
-const FACEIT_LOGO_URL = 'https://upload.wikimedia.org/wikipedia/commons/9/95/FACEITLogo.png';
+// The FACEIT logo (square crop of the official mark) and per-level icons are
+// hosted on this project's own GitHub repo (see assets/), not a third-party
+// domain - Discord's Rich Presence image resolver only reliably renders
+// large-image URLs when the image is actually square-ish; the original wide
+// banner logo showed up as cropped letter fragments instead of the icon.
+const FACEIT_LOGO_URL = faceitLogoUrl();
 
 // Map images source: https://github.com/MurkyYT/cs2-map-icons - auto-updated from the
 // CS2 game files, official Valve images.
@@ -65,12 +66,6 @@ class PresenceService extends EventEmitter {
     this.running = false;
     this.startTimestamp = null;
     this.lastStatusText = 'Stopped';
-    this.badgePalette = 'orange';
-  }
-
-  /** Which color palette to use for the FACEIT level badge (small image). */
-  setBadgePalette(palette) {
-    this.badgePalette = palette || 'orange';
   }
 
   /** Point the service at the folder holding .env / cache.json, and (re)load config. */
@@ -263,10 +258,10 @@ class PresenceService extends EventEmitter {
       startTimestamp: this.startTimestamp,
     };
 
-    // Small corner badge on the large image, showing the FACEIT skill level.
+    // Small corner badge on the large image, showing the real FACEIT skill level icon.
     // No-op (undefined) until GITHUB_REPO is configured in app-config.js.
     const clampedLevel = Math.min(10, Math.max(1, Number(level) || 1));
-    const badge = badgeUrl(this.badgePalette, clampedLevel);
+    const badge = levelIconUrl(clampedLevel);
     if (badge) {
       baseActivity.smallImageKey = badge;
       baseActivity.smallImageText = `Level ${level}`;

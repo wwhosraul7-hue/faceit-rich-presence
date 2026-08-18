@@ -16,7 +16,6 @@ const els = {
   installResult: document.getElementById('install-result'),
   statusLine: document.getElementById('status-line'),
   langButtons: Array.from(document.querySelectorAll('.lang-btn')),
-  paletteButtons: Array.from(document.querySelectorAll('.swatch')),
   togglePasswordBtn: document.getElementById('toggle-password'),
 };
 
@@ -27,7 +26,6 @@ const TEXT_BINDINGS = {
   // label-apiKey / label-nickname have a <span class="req"> child, handled separately below
   'hint-apiKey-pre': 'settingsApiKeyHintPre',
   'label-poll': 'settingsPollLabel',
-  'label-palette': 'settingsBadgePaletteLabel',
   'label-advanced': 'settingsAdvanced',
   'label-clientId': 'settingsDiscordIdLabel',
   'hint-clientId-pre': 'settingsDiscordIdHintPre',
@@ -40,7 +38,6 @@ const TEXT_BINDINGS = {
 };
 
 let currentStrings = null;
-let currentPalette = 'orange';
 
 function applyStrings(strings) {
   currentStrings = strings;
@@ -65,11 +62,6 @@ function applyStrings(strings) {
 
 function setActiveLangButton(lang) {
   els.langButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === lang));
-}
-
-function setActivePalette(palette) {
-  currentPalette = palette;
-  els.paletteButtons.forEach((btn) => btn.classList.toggle('selected', btn.dataset.palette === palette));
 }
 
 function fieldMap() {
@@ -126,7 +118,6 @@ async function init() {
   const uiState = await window.api.getUiState();
   applyStrings(uiState.strings);
   setActiveLangButton(uiState.language);
-  setActivePalette(uiState.badgePalette);
 
   const settings = await window.api.loadSettings();
   const f = fieldMap();
@@ -180,13 +171,6 @@ els.closeBtn.addEventListener('click', () => window.close());
 
 els.langButtons.forEach((btn) => {
   btn.addEventListener('click', () => window.api.setLanguage(btn.dataset.lang));
-});
-
-els.paletteButtons.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    setActivePalette(btn.dataset.palette);
-    window.api.setPalette(btn.dataset.palette);
-  });
 });
 
 els.installGsi.addEventListener('click', async () => {

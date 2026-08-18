@@ -12,7 +12,6 @@ contextBridge.exposeInMainWorld('api', {
   openDiscordDevs: () => ipcRenderer.invoke('settings:open-discord-devs'),
   getStatus: () => ipcRenderer.invoke('settings:get-status'),
   setLanguage: (lang) => ipcRenderer.invoke('settings:set-language', lang),
-  setPalette: (palette) => ipcRenderer.invoke('settings:set-palette', palette),
   onStatus: (callback) => ipcRenderer.on('settings:status-changed', (_event, text) => callback(text)),
   onLanguage: (callback) => ipcRenderer.on('settings:language-changed', (_event, state) => callback(state)),
 });

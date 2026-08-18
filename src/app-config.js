@@ -2,7 +2,9 @@
  * App-wide constants that depend on where this project's GitHub repo ends
  * up living - fill in GITHUB_REPO once the repo exists (see README).
  * Used for: checking for new versions (GitHub Releases) and hosting the
- * FACEIT level badge images shown on Rich Presence.
+ * FACEIT logo + level badge images shown on Rich Presence (must be a
+ * PUBLIC repo - raw.githubusercontent.com/api.github.com both 404 on
+ * private repos without authentication).
  */
 
 'use strict';
@@ -14,9 +16,19 @@ function isGithubRepoConfigured() {
   return GITHUB_REPO !== 'CHANGEME/CHANGEME' && /^[^/\s]+\/[^/\s]+$/.test(GITHUB_REPO);
 }
 
-function badgeUrl(palette, level) {
+function rawAssetUrl(relativePath) {
   if (!isGithubRepoConfigured()) return null;
-  return `https://raw.githubusercontent.com/${GITHUB_REPO}/main/assets/badges/${palette}/level_${level}.png`;
+  return `https://raw.githubusercontent.com/${GITHUB_REPO}/main/assets/${relativePath}`;
 }
 
-module.exports = { GITHUB_REPO, isGithubRepoConfigured, badgeUrl };
+/** Real FACEIT skill level icon (1-10), sourced from the game's own files - see assets/README.md. */
+function levelIconUrl(level) {
+  return rawAssetUrl(`levels/level_${level}.png`);
+}
+
+/** The FACEIT flag mark, cropped square from FACEIT's official logo (Wikimedia, CC BY 4.0). */
+function faceitLogoUrl() {
+  return rawAssetUrl('faceit-logo.png');
+}
+
+module.exports = { GITHUB_REPO, isGithubRepoConfigured, levelIconUrl, faceitLogoUrl };

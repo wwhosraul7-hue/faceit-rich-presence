@@ -1,8 +1,7 @@
 /**
- * App-level preferences that aren't FACEIT/Discord config: UI language and
- * the FACEIT level badge color palette. Stored separately from .env in a
- * small JSON file next to it, so config-store.js stays focused on the
- * .env / .cfg pair.
+ * App-level preferences that aren't FACEIT/Discord config: just the UI
+ * language for now. Stored separately from .env in a small JSON file next
+ * to it, so config-store.js stays focused on the .env / .cfg pair.
  */
 
 'use strict';
@@ -12,10 +11,8 @@ const path = require('path');
 
 const DEFAULTS = {
   language: 'ro',
-  badgePalette: 'orange',
 };
 
-const PALETTES = ['orange', 'blue', 'purple'];
 const LANGUAGES = ['ro', 'en'];
 
 function filePath(baseDir) {
@@ -27,7 +24,6 @@ function load(baseDir) {
     const raw = JSON.parse(fs.readFileSync(filePath(baseDir), 'utf8'));
     return {
       language: LANGUAGES.includes(raw.language) ? raw.language : DEFAULTS.language,
-      badgePalette: PALETTES.includes(raw.badgePalette) ? raw.badgePalette : DEFAULTS.badgePalette,
     };
   } catch {
     return { ...DEFAULTS };
@@ -41,4 +37,4 @@ function save(baseDir, settings) {
   return merged;
 }
 
-module.exports = { load, save, DEFAULTS, PALETTES, LANGUAGES };
+module.exports = { load, save, DEFAULTS, LANGUAGES };
